@@ -1,0 +1,13 @@
+version = 0.1
+[y]
+[y.deploy]
+[y.deploy.parameters]
+stack_name = "queue-stack-name"
+s3_bucket = "aws-sam-cli-managed-default-samclisourcebucket-1ijnbi80oelfs"
+s3_prefix = "queue-stack-name"
+region = "ap-south-1"
+confirm_changeset = true
+capabilities = "CAPABILITY_IAM"
+disable_rollback = true
+parameter_overrides = "StandardQueueName=\"DemoStandardQueue\""
+image_repositories = []

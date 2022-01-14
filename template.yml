@@ -1,0 +1,141 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: 'AWS::Serverless-2016-10-31'
+Description: Serverless Application Model example
+
+Globals:
+  Api:
+    EndpointConfiguration: REGIONAL
+    Name: "RasoolAPI"
+  Function:
+    Timeout: 20
+Parameters:
+  Environment:
+    Type: String
+    Default: DEV
+    Description: Environment Name
+  StandardQueueName:
+    Type: String
+    Default: DefaultQueueName
+    Description: Standard Queue Name
+  PersonTableName:
+    Type: String
+    Default: PersonTable
+    Description: Person Table Name
+
+Resources:
+  PersonTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      AttributeDefinitions:
+        - AttributeName: personId
+          AttributeType: S
+        - AttributeName: personName
+            AttributeType: S
+        - AttributeName: age
+            AttributeType: N
+        - AttributeName: gender
+            AttributeType: S
+        - AttributeName: address
+            AttributeType: S
+        KeySchema:
+          - AttributeName: personId
+            KeyType: HASH
+      KeySchema:
+        - AttributeName: personId
+          keyType: HASH
+      TableName: !Ref PersonTableName
+      BillingMode: PAY_PER_REQUEST
+      StreamSpecification:
+        StreamViewType: NEW_IMAGE
+
+  StorePersonFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: org.example.handler.PersonHandler::handleRequest
+      Runtime: java8
+      MemorySize: 512
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref PersonTable
+      Environment:
+        Variables:
+          TABLE_NAME: !Ref PersonTable
+      Architectures:
+        - x86_64
+      CodeUri:
+      Events:
+        StoreApi:
+          Type: Api
+          Properties:
+            Path: /persons
+            Method: POST
+  GetPersonByHTTPParamFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: org.example.handler.PersonHandler::handleGetRequest
+      Runtime: java8
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref PersonTable
+      Environment:
+        Variables:
+          TABLE_NAME: !Ref PersonTable
+      MemorySize: 512
+      Architectures:
+        - x86_64
+      CodeUri:
+      Events:
+        GetPerson:
+          Type: Api
+          Properties:
+            Path: /persons/{id}
+            Method: GET
+#        GetAllPerson:
+#          Type: Api
+#          Properties:
+#            Path: /persons
+#            Method: GET
+  HelloWorldFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: org.example.handler.App::handleRequest
+      Runtime: java8
+      MemorySize: 512
+      Architectures:
+        - x86_64
+      CodeUri:
+      Events:
+        HelloWorld:
+          Type: Api
+          Properties:
+            Path: /test
+            Method: GET
+  MyQueueHandler:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: org.example.handler.MyQueueRequestHandler::handleRequest
+      Runtime: java8
+      MemorySize: 512
+      Tracing: Active
+      Architectures:
+        - x86_64
+      CodeUri:
+      Events:
+        HelloWorld:
+          Type: SQS
+          Properties:
+            Queue: !GetAtt MyQueue.Arn
+            BatchSize: 1
+  MyQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: !Ref StandardQueueName
+
+
+Outputs:
+  StandardQueueURL:
+    Description: Queue URL for standard queue
+    Value: !Ref MyQueue
+  StandardQueueArn:
+    Description: Queue Arn for Standard queue
+    Value: !GetAtt MyQueue.Arn
