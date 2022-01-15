@@ -11,3 +11,16 @@ capabilities = "CAPABILITY_IAM"
 disable_rollback = true
 parameter_overrides = "StandardQueueName=\"DemoStandardQueue\""
 image_repositories = []
+
+[default]
+[default.deploy]
+[default.deploy.parameters]
+stack_name = "dynamo-stream-handler-demo"
+s3_bucket = "aws-sam-cli-managed-default-samclisourcebucket-ufa4ex7a0svj"
+s3_prefix = "dynamo-stream-handler-demo"
+region = "ap-south-1"
+confirm_changeset = true
+capabilities = "CAPABILITY_IAM"
+disable_rollback = true
+parameter_overrides = "Environment=\"DEV\" StandardQueueName=\"Tazi-Queue\" PersonTableName=\"Person\""
+image_repositories = []

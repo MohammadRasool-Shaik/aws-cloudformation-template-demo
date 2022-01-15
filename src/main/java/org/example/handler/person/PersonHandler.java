@@ -1,4 +1,4 @@
-package org.example.handler;
+package org.example.handler.person;
 
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
